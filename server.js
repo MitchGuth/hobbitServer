@@ -1,12 +1,5 @@
 const http = require('http');
 const fs = require('fs');
-const readline = require('readline');
-
-let rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-let contactPrefix = '/contacts/';
 let parsedData;
 
 let readBody = (req, callback) =>{
@@ -17,73 +10,151 @@ let readBody = (req, callback) =>{
     req.on('end', ()=>{
         callback(body);
     });
-}
+};
 
-let server = http.createServer((req, res) => {
-    if (req.url === "/contacts" && req.method === "GET"){
-        fs.readFile('hobbits.json',(error, data) =>{
-            if (error){
-                res.end('hobbits not found');
-            }
-            else{
-                res.end(data.toString());
-            }
+let notFound = (req, res, matches) =>{
+    res.end("404 not found.");
+};
+
+let generateID = () => {
+    return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString();
+};
+
+let getContact = (req, res, matches) => {
+    fs.readFile('hobbits.json', (error, data) => {
+        if (error){
+            res.end('hobbits not found');
+        }
+        else{
+            var parsedData = JSON.parse(data);
+            res.end(JSON.stringify(parsedData[matches]));
+        }
         });
-    }
-    else if (req.url.startsWith(contactPrefix) && req.method === "GET"){
-        let number = req.url.slice(contactPrefix.length);
-        fs.readFile('hobbits.json', (error, data) => {
-            if (error){
-                res.end('hobbits not found');
-            }
-            else{
-                parsedData = JSON.parse(data);
-                res.end(parsedData[number]);
-            }
-        });
-    }
-    else if (req.url.startsWith(contactPrefix) && req.method === "DELETE"){
-        let number = req.url.slice(contactPrefix.length);
-        fs.readFile('hobbits.json', (error, data) =>{
-            if (error){
-                res.end('hobbits not found');
-            }
-            else{
-                parsedData = JSON.parse(data);
-                res.end('You have deleted ' + parsedData[number]);
-                delete parsedData[number];
-                let stringifiedData = JSON.stringify(parsedData);
-                fs.writeFile('hobbits.json', stringifiedData, (error) => {
-                    if (error){
-                        res.end(error);
-                    }
-                });
-            }
-        });
-    }
-    else if (req.url === "/contacts" && req.method === "POST"){
-        //grab information from the post
-        //read file and place data in let then add new info to let and then write file
-        fs.readFile('hobbits.json', (error, data) => {
+};
+
+let getAllContacts = (req, res, matches) => {
+    fs.readFile('hobbits.json', (error, data) =>{
+        if (error){
+            res.end('hobbits not found');
+        }
+        else{
+            res.end(data.toString());
+        }
+    });
+};
+
+let deleteContact = (req, res, matches) => {
+    fs.readFile('hobbits.json', (error, data) =>{
+        if (error){
+            res.end('hobbits not found');
+        }
+        else{
             parsedData = JSON.parse(data);
-            readBody(req, (body)=>{
-                let contact = JSON.parse(body);
-                console.log(contact);
-                res.end('Created Contact!');
-                let newKey = ((Object.keys(parsedData).length) + 1);
-                parsedData[newKey] = contact;
-                let stringifiedData = JSON.stringify(parsedData);
-                fs.writeFile('hobbits.json', stringifiedData, (error) =>{
-                    if (error){
-                        res.end(error)
-                    }
-                    else {
-                        res.end(contact + " has been added to the list!")
-                    }
-                });
+            res.end('You have deleted ' + parsedData[matches]);
+            delete parsedData[matches];
+            let stringifiedData = JSON.stringify(parsedData);
+            fs.writeFile('hobbits.json', stringifiedData, (error) => {
+                if (error){
+                    res.end(error);
+                }
+            });
+        }
+    });
+};
+
+let createContact = (req, res, matches) => {
+    fs.readFile('hobbits.json', (error, data) => {
+        parsedData = JSON.parse(data);
+        readBody(req, (body) => {
+            let contact = JSON.parse(body);
+            console.log(contact);
+            res.end('Created Contact!');
+            let newKey = generateID();
+            contact.id = newKey;
+            parsedData[newKey] = contact;
+            let stringifiedData = JSON.stringify(parsedData);
+            fs.writeFile('hobbits.json', stringifiedData, (error) =>{
+                if (error){
+                    res.end(error)
+                }
+                else {
+                    //adjust so just the name is printed
+                    res.end(contact + " has been added to the list!")
+                }
             });
         });
+    });
+};
+
+let renderHome = (req, res, matches) => {
+    fs.readFile('frontend/index.html', 'utf8', (error, data) => {
+        if (error) {
+            res.end(error);
+        }
+        else{
+            res.end(data);
+        }
+
+    });
+};
+
+let renderIndexJS = (req, res, matches) => {
+    fs.readFile('frontend/index.js', 'utf8', (error, data) => {
+        if (error) {
+            res.end(error);
+        }
+        else{
+            res.end(data);
+        }
+    });
+};
+
+let routes = [
+    {
+        method: "GET", 
+        url: /^\/contacts$/,
+        run: getAllContacts
+    },
+    {
+        method: "GET",
+        url: /^\/contacts\/([0-9]+$)/,
+        run: getContact
+    },
+
+    {
+        method: "DELETE", 
+        url: /^\/contacts\/([0-9]+)$/ ,
+        run: deleteContact
+    },
+    {
+        method: "POST", 
+        url: /^\/contacts$/,
+        run: createContact
+    },
+    {
+        method: "GET", 
+        url: /^\/$/,
+        run: renderHome
+    },
+    {
+        method: "GET",
+        url: /^.*$/,
+        run: renderIndexJS
+    },
+    {
+        method: "GET",
+        url: /^.*$/,
+        run: notFound
     }
+]
+
+let server = http.createServer((req, res) => {
+    console.log(req.url);
+    let route = routes.find((route) =>
+        route.url.test(req.url) && req.method === route.method);
+    let matches = route.url.exec(req.url).slice(1);
+    console.log("server working")
+    route.run(req, res, matches);
 });
 
 server.listen(3000);

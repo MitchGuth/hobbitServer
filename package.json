@@ -1,0 +1,24 @@
+{
+  "name": "hobbitServer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MitchGuth/hobbitServer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MitchGuth/hobbitServer/issues"
+  },
+  "homepage": "https://github.com/MitchGuth/hobbitServer#readme",
+  "dependencies": {
+    "pg-promise": "^8.4.6"
+  }
+}

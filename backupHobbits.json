@@ -1,7 +1,1 @@
-{
-    "1": "frodo",
-    "2": "samwise", 
-    "3": "meriadoc", 
-    "4": "perigrin", 
-    "5": "bilbo"
-}
+{"7852940174306879":{"name":"frodo", "email": "ringbear@gmail.com", "phone":"1234", "address":"the Shire","id":"7852940174306879"},"7163027783442521":{"name":"samwise","email":"notyourmomma'sgardner@gmail.com" , "phone":"1234", "address":"the Shire","id":"7163027783442521"},"6371175688559853":{"name":"meriadoc", "email": "rohan4life@gmail.com", "phone":"1234", "address":"the Shire","id":"6371175688559853"},"8314795827931729":{"name":"perigrin", "email": "foolofatook@gmail.com", "phone":"1234", "address":"the Shire","id":"8314795827931729"},"3057261488022891":{"name":"aragorn","email": "justcantwait2bking@gmail.com", "phone":"1234", "address":"Gondor","id":"3057261488022891"},"8301181243107385":{"name":"gandalf", "email": "50shadesofwhite@gmail.com", "phone":"1234", "address":"Everywhere","id":"8301181243107385"},"8164933159285739":{"name":"legolas", "email": "iwonathelmsdeep@gmail.com", "phone":"1234", "address":"Mirkwood","id":"8164933159285739"},"4130297665975505":{"name":"gimli", "email": "longdistancesprinter@gmail.com", "phone":"1234", "address":"next to Legolas","id":"4130297665975505"}}
