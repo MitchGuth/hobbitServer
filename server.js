@@ -1,5 +1,9 @@
 const http = require('http');
 const fs = require('fs');
+const pg = require('pg-promise')();
+const dbConfig = 'postgres://MitchGuth@localhost:5432/contacts';
+const db = pg(dbConfig);
+
 let parsedData;
 
 let readBody = (req, callback) =>{
@@ -21,26 +25,34 @@ let generateID = () => {
 };
 
 let getContact = (req, res, matches) => {
-    fs.readFile('hobbits.json', (error, data) => {
-        if (error){
-            res.end('hobbits not found');
-        }
-        else{
-            var parsedData = JSON.parse(data);
-            res.end(JSON.stringify(parsedData[matches]));
-        }
+    db.query('SELECT * FROM characters WHERE id = ' + matches[0])
+        .then((characters) =>{
+            res.end(JSON.stringify(characters))
         });
+    // fs.readFile('hobbits.json', (error, data) => {
+    //     if (error){
+    //         res.end('hobbits not found');
+    //     }
+    //     else{
+    //         var parsedData = JSON.parse(data);
+    //         res.end(JSON.stringify(parsedData[matches]));
+    //     }
+    //     });
 };
 
 let getAllContacts = (req, res, matches) => {
-    fs.readFile('hobbits.json', (error, data) =>{
-        if (error){
-            res.end('hobbits not found');
-        }
-        else{
-            res.end(data.toString());
-        }
-    });
+    db.query('SELECT * FROM characters')
+        .then((characters) => {
+            res.end(JSON.stringify(characters))
+        });
+    // fs.readFile('hobbits.json', (error, data) =>{
+    //     if (error){
+    //         res.end('hobbits not found');
+    //     }
+    //     else{
+    //         res.end(data.toString());
+    //     }
+    // });
 };
 
 let deleteContact = (req, res, matches) => {
@@ -117,7 +129,7 @@ let routes = [
     },
     {
         method: "GET",
-        url: /^\/contacts\/([0-9]+$)/,
+        url: /^\/contacts\/([0-9]+)$/,
         run: getContact
     },
 
